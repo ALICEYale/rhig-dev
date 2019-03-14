@@ -1,0 +1,115 @@
+pass: "usedefault"
+recycleUnusedEmbeddedEventsMode: false
+inputObjects:
+    cells:
+        cells:
+            branchName: "usedefault"
+        cells_toy:
+            branchName: "toy_cells"
+            embedding: false
+        cells_combined:
+            branchName: "emcalCellsCombined"
+    clusterContainers:
+        baseClusterContainer:        # Used for the clusterizer
+            branchName: "caloClustersCombined"
+        baseClusterContainer_1:      # Used after clusterizer
+            minE: 0.0
+            minPt: 0.0
+        baseClusterContainer_2:      # Used for cluster-track matcher and after
+            minE: 0.0
+            minPt: 0.0
+            clusNonLinCorrEnergyCut: 0.15
+    trackContainers:
+        trackContainerName:
+            branchName: "usedefault"
+            minPt: 0.15
+        trackContainerName_toy:
+            embedding: false
+CellEnergy_data:
+    enabled: true
+    createHistos: true
+    enableRun2TempCalib: true
+    cellsNames:
+        - cells
+CellEnergyVariation_toy:
+    enabled: true
+    createHistos: true
+    minCellE: 0.05
+    maxCellE: 120.
+    energyScaleFactorConstant: 1.041
+    cellsNames:
+        - cells_toy
+CellBadChannel_data:
+    enabled: true
+    createHistos: true
+    cellsNames:
+        - cells
+CellBadChannel_toy:
+    enabled: true
+    createHistos: true
+    cellsNames:
+        - cells_toy
+CellTimeCalib_data:
+    enabled: true
+    createHistos: true
+    cellsNames:
+        - cells
+CellTimeCalib_toy:
+    enabled: true
+    createHistos: true
+    cellsNames:
+        - cells_toy
+CellCombineToy_combined:
+    enabled: true
+    createHistos: true
+    toyCellsBranchName: "toy_cells"                # Name of the toy cells branch in the input event.
+    combinedCellsBranchName: "emcalCellsCombined"   # Name of the cells branch to be created for the combined cells in the input event.
+    verifyCombinedCells: true
+    cellsNames:
+        - cells
+Clusterizer_combined:
+    enabled: true
+    cellE: 0.1
+    seedE: 0.3
+    cellsNames:
+        - cells_combined
+    clusterContainersNames:     # By selecting the cluster container here, we set where it will be output
+        - baseClusterContainer
+ClusterExotics_combined:
+    enabled: true
+    createHistos: true
+    cellsNames:
+        - cells_combined
+    clusterContainersNames:
+        - baseClusterContainer_1
+ClusterNonLinearity_combined:
+    enabled: true
+    createHistos: true
+    nonLinFunct: kBeamTestCorrectedv4
+    cellsNames:
+        - cells_combined
+    clusterContainersNames:
+        - baseClusterContainer_1
+ClusterTrackMatcher_combined:
+    enabled: true
+    createHistos: true
+    cellsNames:
+        - cells_combined
+    clusterContainersNames:
+        - baseClusterContainer_2
+    trackContainersNames:
+        - trackContainerName
+        - trackContainerName_toy
+ClusterHadronicCorrection_combined:
+    enabled: true
+    createHistos: true
+    plotOversubtractionHistograms: true
+    doMomDepMatching: true
+    hadCorr: 2.
+    cellsNames:
+        - cells_combined
+    clusterContainersNames:
+        - baseClusterContainer_2
+    trackContainersNames:
+        - trackContainerName
+        - trackContainerName_toy
