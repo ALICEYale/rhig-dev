@@ -1,0 +1,1 @@
+~/alice/data/2015/LHC15o/000246757/pass1/AOD/002/AliAOD.root
