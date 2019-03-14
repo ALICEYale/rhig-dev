@@ -1,0 +1,155 @@
+From e5b24e0f0bdfb70b4cedd7202b3edb6419b7ca31 Mon Sep 17 00:00:00 2001
+From: jmulliga <james.mulligan@yale.edu>
+Date: Tue, 28 Jun 2016 18:17:05 -0400
+Subject: [PATCH] add cell histograms to tender
+
+---
+ PWG/EMCAL/EMCALtasks/AliEmcalTenderTask.cxx | 53 ++++++++++++++++++++++++++++-
+ PWG/EMCAL/EMCALtasks/AliEmcalTenderTask.h   |  6 ++++
+ PWG/EMCAL/macros/AddTaskEMCALTender.C       |  9 +++++
+ 3 files changed, 67 insertions(+), 1 deletion(-)
+
+diff --git a/PWG/EMCAL/EMCALtasks/AliEmcalTenderTask.cxx b/PWG/EMCAL/EMCALtasks/AliEmcalTenderTask.cxx
+index 2700093..24ee49a 100644
+--- a/PWG/EMCAL/EMCALtasks/AliEmcalTenderTask.cxx
++++ b/PWG/EMCAL/EMCALtasks/AliEmcalTenderTask.cxx
+@@ -19,6 +19,11 @@ ClassImp(AliEmcalTenderTask)
+ AliEmcalTenderTask::AliEmcalTenderTask():
+   AliAnalysisTaskSE(),
+   fEMCALTender(NULL)
++  ,fCellEnergyDistBefore(0)
++  ,fCellEnergyDistAfter(0)
++  ,fCellTimeDistBefore(0)
++  ,fCellTimeDistAfter(0)
++  ,fOutput(0)
+ {
+   // Default constructor.
+ }
+@@ -27,9 +32,15 @@ AliEmcalTenderTask::AliEmcalTenderTask():
+ AliEmcalTenderTask::AliEmcalTenderTask(const char* name):
+   AliAnalysisTaskSE(name),
+   fEMCALTender(NULL)
++  ,fCellEnergyDistBefore(0)
++  ,fCellEnergyDistAfter(0)
++  ,fCellTimeDistBefore(0)
++  ,fCellTimeDistAfter(0)
++  ,fOutput(0)
+ {
+   // Constructor.
+   DefineOutput(1,  AliAODEvent::Class());
++  DefineOutput(2, TList::Class());
+ }
+ 
+ //______________________________________________________________________________
+@@ -71,12 +82,52 @@ void AliEmcalTenderTask::ConnectInputData(Option_t *option)
+ void AliEmcalTenderTask::UserCreateOutputObjects()
+ {
+   // Nothing to be done.
++  
++  // Allow for output files
++  OpenFile(2);
++  fOutput = new TList();
++  fOutput->SetOwner();
++  
++  fCellEnergyDistBefore = new TH1F("hCellEnergyDistBefore","hCellEnergyDistBefore;E_cell",1000,0,10);
++  fOutput->Add(fCellEnergyDistBefore);
++  fCellEnergyDistAfter = new TH1F("hCellEnergyDistAfter","hCellEnergyDistAfter;E_cell",1000,0,10);
++  fOutput->Add(fCellEnergyDistAfter);
++  fCellTimeDistBefore = new TH1F("hCellTimeDistBefore","hCellTimeDistBefore;t_cell",1000,-10e-6,10e-6);
++  fOutput->Add(fCellTimeDistBefore);
++  fCellTimeDistAfter = new TH1F("hCellTimeDistAfter","hCellTimeDistAfter;t_cell",1000,-10e-6,10e-6);
++  fOutput->Add(fCellTimeDistAfter);
++  
++  PostData(2, fOutput);
+ }
+ 
+ //______________________________________________________________________________
+ void AliEmcalTenderTask::UserExec(Option_t*)
+ {
++  // BEFORE QA
++  Short_t  absId  =-1;
++  Double_t ecell = 0;
++  Double_t tcell = 0;
++  Double_t efrac = 0;
++  Int_t  mclabel = -1;
++  
++  AliVCaloCells *cells= InputEvent()->GetEMCALCells();
++  
++  for (Int_t iCell = 0; iCell < cells->GetNumberOfCells(); iCell++){
++    cells->GetCell(iCell, absId, ecell, tcell, mclabel, efrac);
++    fCellEnergyDistBefore->Fill(ecell);
++    fCellTimeDistBefore->Fill(tcell);
++  }
++  
+   // Process the event.
+-
+   fEMCALTender->ProcessEvent();
++
++  // AFTER QA
++  for (Int_t iCell = 0; iCell < cells->GetNumberOfCells(); iCell++){
++    cells->GetCell(iCell, absId, ecell, tcell, mclabel, efrac);
++    fCellEnergyDistAfter->Fill(ecell);
++    fCellTimeDistAfter->Fill(tcell);
++  }
++  
++  PostData(2, fOutput);
++
+ }
+diff --git a/PWG/EMCAL/EMCALtasks/AliEmcalTenderTask.h b/PWG/EMCAL/EMCALtasks/AliEmcalTenderTask.h
+index ff58ffb..09bf1da 100644
+--- a/PWG/EMCAL/EMCALtasks/AliEmcalTenderTask.h
++++ b/PWG/EMCAL/EMCALtasks/AliEmcalTenderTask.h
+@@ -13,10 +13,16 @@ class AliEmcalTenderTask : public AliAnalysisTaskSE {
+ 
+ protected:
+   AliEMCALTenderSupply      *fEMCALTender;
++  TH1F* fCellEnergyDistBefore;
++  TH1F* fCellEnergyDistAfter;
++  TH1F* fCellTimeDistBefore;
++  TH1F* fCellTimeDistAfter;
+   
+ private:
+   AliEmcalTenderTask(const AliEmcalTenderTask &other);
+   AliEmcalTenderTask& operator=(const AliEmcalTenderTask &other);
++  
++  TList * fOutput;                                        //!<! Output for histograms
+ 
+ public:  
+   AliEmcalTenderTask();
+diff --git a/PWG/EMCAL/macros/AddTaskEMCALTender.C b/PWG/EMCAL/macros/AddTaskEMCALTender.C
+index 4e44a5f..61403d5 100644
+--- a/PWG/EMCAL/macros/AddTaskEMCALTender.C
++++ b/PWG/EMCAL/macros/AddTaskEMCALTender.C
+@@ -44,6 +44,7 @@ AliAnalysisTaskSE *AddTaskEMCALTender(
+ 
+   AliAnalysisTaskSE *ana = 0;
+   AliAnalysisDataContainer *coutput1 = 0;
++  AliAnalysisDataContainer *coutput2 = 0;
+ 
+   #ifdef __CLING__
+     // ROOT6 version of the Config macro. JIT cannot handle load and execute macro (compiler error) - need to call via gROOT->ProcessLine(...)
+@@ -127,6 +128,13 @@ AliAnalysisTaskSE *AddTaskEMCALTender(
+                                       AliAODEvent::Class(), 
+                                       AliAnalysisManager::kExchangeContainer, 
+                                       "default_tender");
++    
++    
++    coutput2 = mgr->CreateContainer("emcal_tender_plots",
++                                                              TList::Class(),
++                                                              AliAnalysisManager::kOutputContainer,
++                                    Form("%s",AliAnalysisManager::GetCommonFileName()));
++    
+   } else {
+     ::Error("AddTaskEMCALTender", "Input event handler not recognized, AOD/ESD expected. Returning...");
+     return NULL;
+@@ -140,6 +148,7 @@ AliAnalysisTaskSE *AddTaskEMCALTender(
+ 
+   mgr->ConnectInput(ana, 0, mgr->GetCommonInputContainer());
+   mgr->ConnectOutput(ana, 1, coutput1 );
++  mgr->ConnectOutput(ana, 2, coutput2 );
+ 
+   ::Info("AddTaskEMCALTender", "Tender configured");
+    
+-- 
+2.6.4 (Apple Git-63)
+

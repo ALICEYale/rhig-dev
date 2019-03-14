@@ -1,0 +1,256 @@
+configurationName: "New EMCal corrections test configuration"
+#period: "LHC16e1"
+#period: "LHC12a15e"
+period: "LHC11h"
+pass: ""
+sharedParameters:
+    # Need to determine what we actually want to share
+    #cellBranchName: "emcalCellsNew"
+    #cellBranchName: "EMCALCellsNew"
+    #clusterBranchName: "caloClustersNew"
+    #trackBranchName: "tracksNew"
+    cellBranchName: "usedefault"
+    clusterBranchName: "usedefault"
+    clusterCombinedBranchName: "caloClustersCombined"
+    trackBranchName: "usedefault"
+inputObjects:
+    cells:
+        cells:
+            branchName: "sharedParameters:cellBranchName"
+        cells_embed:
+            branchName: "sharedParameters:cellBranchName"
+            embedding: true
+        cells_combined:
+            branchName: "emcalCellsCombined"
+            # The branch is located in the external event
+            #embedding: true
+    clusterContainers:
+        baseClusterContainer:
+            # Sets the branch name
+            branchName: "sharedParameters:clusterBranchName"
+            # Takes all default cuts!
+        baseClusterContainer_embed:
+            embedding: true
+        baseClusterContainer_combined:
+            branchName: "sharedParameters:clusterCombinedBranchName"
+        # Used after clusterizer
+        baseClusterContainer1:
+            # Sets the branch name
+            branchName: "sharedParameters:clusterBranchName"
+            minE: 0.0                        # Formerly clusterEMin
+            minPt: 0.0                       # Formerly clusterPtMin
+        baseClusterContainer1_embed:
+            embedding: true
+        baseClusterContainer1_combined:
+            # Sets the branch name
+            branchName: "sharedParameters:clusterCombinedBranchName"
+        # Used for cluster-track matcher and after
+        baseClusterContainer2:
+            # Sets the branch name
+            branchName: "sharedParameters:clusterBranchName"
+            minE: 0.0                        # Formerly clusterEMin
+            minPt: 0.0                       # Formerly clusterPtMin
+            clusNonLinCorrEnergyCut: 0.15    # Formerly "minPt" and then clusterNonLinCorrEnergyMin
+        baseClusterContainer2_embed:
+            embedding: true
+        baseClusterContainer2_combined:
+            branchName: "sharedParameters:clusterCombinedBranchName"
+    trackContainers:
+        trackContainerName:
+            # Sets the branch name
+            branchName: "sharedParameters:trackBranchName"
+            minPt: 0.15                    # formerly "minPt"
+            trackFilterType: kHybridTracks
+        trackContainerName_embed:
+            embedding: true
+# Cell energy
+CellEnergy:
+    enabled: true
+    createHistos: false
+    cellsNames:
+        - cells
+# _data is equivalent to the base correction, but I am making it explicit for clarity
+CellEnergy_data:
+    cellsNames:
+        - cells
+CellEnergy_embed:
+    cellsNames:
+        - cells_embed
+CellEnergy_combined:
+    cellsNames:
+        - cells_combined
+
+# Cell bad channel
+CellBadChannel:
+    enabled: true
+    createHistos: false
+    cellsNames:
+        - cells
+CellBadChannel_data:
+    cellsNames:
+        - cells
+CellBadChannel_embed:
+    cellsNames:
+        - cells_embed
+CellBadChannel_combined:
+    cellsNames:
+        - cells_combined
+
+# Cell Time Calib
+CellTimeCalib:
+    enabled: true
+    createHistos: false
+    cellsNames:
+        - cells
+CellTimeCalib_data:
+    cellsNames:
+        - cells
+CellTimeCalib_embed:
+    cellsNames:
+        - cells_embed
+CellTimeCalib_combined:
+    cellsNames:
+        - cells_combined
+
+# Clusterizer
+Clusterizer:
+    enabled: true
+    createHistos: true
+    cellsNames:
+        - cells
+    clusterContainersNames:
+        - baseClusterContainer
+Clusterizer_data:
+    cellsNames:
+        - cells
+    clusterContainersNames:
+        - baseClusterContainer
+Clusterizer_embed:
+    cellsNames:
+        - cells_embed
+    clusterContainersNames:
+        - baseClusterContainer_embed
+Clusterizer_combined:
+    cellsNames:
+        - cells_combined
+    # By selecting the cluster container here, we set where it will be output
+    clusterContainersNames:
+        - baseClusterContainer_combined
+
+# Exotics
+ClusterExotics:
+    enabled: true
+    createHistos: true
+    cellsNames:
+        - cells
+    clusterContainersNames:
+        - baseClusterContainer1
+ClusterExotics_data:
+    cellsNames:
+        - cells
+    clusterContainersNames:
+        - baseClusterContainer1
+ClusterExotics_embed:
+    cellsNames:
+        - cells_embed
+    clusterContainersNames:
+        - baseClusterContainer1_embed
+ClusterExotics_combined:
+    cellsNames:
+        - cells_combined
+    clusterContainersNames:
+        - baseClusterContainer1_combined
+
+# Non-linearity
+ClusterNonLinearity:
+    enabled: true
+    createHistos: true
+    cellsNames:
+        - cells
+    clusterContainersNames:
+        - baseClusterContainer1
+ClusterNonLinearity_data:
+    cellsNames:
+        - cells
+    clusterContainersNames:
+        - baseClusterContainer1
+ClusterNonLinearity_embed:
+    cellsNames:
+        - cells_embed
+    clusterContainersNames:
+        - baseClusterContainer1_embed
+ClusterNonLinearity_combined:
+    cellsNames:
+        - cells_combined
+    clusterContainersNames:
+        - baseClusterContainer1_combined
+
+# Cluster-track matcher
+ClusterTrackMatcher:
+    enabled: true
+    createHistos: true
+    cellsNames:
+        - cells
+    clusterContainersNames:
+        - baseClusterContainer2
+    trackContainersNames:
+        - trackContainerName
+ClusterTrackMatcher_data:
+    enabled: true
+    cellsNames:
+        - cells
+    clusterContainersNames:
+        - baseClusterContainer2
+    trackContainersNames:
+        - trackContainerName
+ClusterTrackMatcher_embed:
+    enabled: true
+    cellsNames:
+        - cells_embed
+    clusterContainersNames:
+        - baseClusterContainer2_embed
+    trackContainersNames:
+        - trackContainerName_embed
+ClusterTrackMatcher_combined:
+    enabled: true
+    cellsNames:
+        - cells_combined
+    clusterContainersNames:
+        - baseClusterContainer2_combined
+    trackContainersNames:
+        - trackContainerName
+        - trackContainerName_embed
+
+# Hadronic correction
+ClusterHadronicCorrection:
+    enabled: true
+    createHistos: true
+    cellsNames:
+        - cells
+    clusterContainersNames:
+        - baseClusterContainer2
+    trackContainersNames:
+        - trackContainerName
+ClusterHadronicCorrection_data:
+    cellsNames:
+        - cells
+    clusterContainersNames:
+        - baseClusterContainer2
+    trackContainersNames:
+        - trackContainerName
+ClusterHadronicCorrection_embed:
+    cellsNames:
+        - cells_embed
+    clusterContainersNames:
+        - baseClusterContainer2_embed
+    trackContainersNames:
+        - trackContainerName_embed
+ClusterHadronicCorrection_combined:
+    cellsNames:
+        - cells_combined
+    clusterContainersNames:
+        - baseClusterContainer2_combined
+    trackContainersNames:
+        - trackContainerName
+        - trackContainerName_embed
+

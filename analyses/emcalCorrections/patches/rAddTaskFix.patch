@@ -1,0 +1,33 @@
+From 67319566e3449bf6a2b6a92cb73b673f14720faf Mon Sep 17 00:00:00 2001
+From: Raymond Ehlers <raymond.ehlers@gmail.com>
+Date: Mon, 17 Apr 2017 13:34:45 -0400
+Subject: [PATCH] Modify R_ADDTASK to ensure it is always defined
+
+See: https://alice.its.cern.ch/jira/browse/TRA-6
+---
+ ANALYSIS/ANALYSIS/AliAnalysisTaskCfg.cxx | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/ANALYSIS/ANALYSIS/AliAnalysisTaskCfg.cxx b/ANALYSIS/ANALYSIS/AliAnalysisTaskCfg.cxx
+index d51ac5d..116c4b5 100644
+--- a/ANALYSIS/ANALYSIS/AliAnalysisTaskCfg.cxx
++++ b/ANALYSIS/ANALYSIS/AliAnalysisTaskCfg.cxx
+@@ -242,10 +242,11 @@ Long64_t AliAnalysisTaskCfg::ExecuteMacro(const char *newargs)
+          TString classname = fRAddTask->ClassName();
+          classname += Form("* __R_ADDTASK__ = (%s*)0x%lx;", classname.Data(),(ULong_t)retval);
+          classname.Prepend("  ");
+-         TObjString *line = fConfigDeps->GetLineWith("__R_ADDTASK__");
+-         if (line) {
+-            TList *lines = fConfigDeps->GetListOfLines();
+-            lines->AddBefore(line, new TObjString(classname));
++         TList *lines = fConfigDeps->GetListOfLines();
++         // Only define the __R_ADDTASK__ object if there is a macro configuration function
++         // It doesn't hurt to define __R_ADDTASK__ even if it is not used.
++         if (lines && lines->GetEntries() > 1) {
++            lines->AddAfter(lines->At(0), new TObjString(classname));
+          }
+       }   
+    }
+-- 
+2.10.1 (Apple Git-78)
+

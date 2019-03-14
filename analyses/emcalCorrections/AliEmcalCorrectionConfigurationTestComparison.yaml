@@ -1,0 +1,50 @@
+configurationName: "New EMCal corrections test configuration"
+#pass: "usedefault" # Only set for MC!!
+sharedParameters:
+    # Need to determine what we actually want to share
+    cellBranchName: "emcalCellsNew"
+    #cellBranchName: "EMCALCellsNew"
+    clusterBranchName: "caloClustersNew"
+    trackBranchName: "tracksNew"
+    #cellBranchName: "usedefault"
+    #clusterBranchName: "usedefault"
+    #trackBranchName: "usedefault"
+inputObjects:
+    cells:
+        defaultCells:
+            # Sets the branch name
+            branchName: "sharedParameters:cellBranchName"
+    clusterContainers:
+        defaultClusterContainer:
+            # Sets the branch name
+            branchName: "sharedParameters:clusterBranchName"
+    trackContainers:
+        defaultTrackContainer:
+            # Sets the branch name
+            branchName: "sharedParameters:trackBranchName"
+CellEnergy:
+    enabled: true
+    createHistos: true
+CellBadChannel:
+    enabled: true
+    createHistos: true
+CellTimeCalib:
+    enabled: true
+    createHistos: true
+Clusterizer:
+    enabled: true
+    createHistos: true
+ClusterExotics:
+    enabled: true
+    createHistos: true
+ClusterNonLinearity:
+    enabled: true
+    createHistos: true
+ClusterTrackMatcher:
+    enabled: true
+    createHistos: true
+    useDCA: false
+    usePIDmass: false
+ClusterHadronicCorrection:
+    enabled: true
+    createHistos: true

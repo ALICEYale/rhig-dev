@@ -1,0 +1,35 @@
+configurationName: "User configuration for AnalysisQA_AOD train. Configured according to EMCal preferences, as described in the 31 March 2017 EMCal Meeting. See: https://indico.cern.ch/event/603057/#sc-1-17-emcal-corrections-in-a. This configuration is for MC."
+pass: "default"
+inputObjects:
+    trackContainers:
+        defaultTrackContainer_1:
+            branchName: "usedefault"
+            trackFilterType: kNoTrackFilter
+CellEnergy:
+    enabled: false
+    createHistos: true
+CellBadChannel:
+    enabled: true
+    createHistos: true
+CellTimeCalib:
+    enabled: false
+    createHistos: true
+Clusterizer:
+    enabled: true
+    createHistos: true
+    clusterizer: kClusterizerv2
+    cellE: 0.1
+    seedE: 0.5
+ClusterExotics:
+    enabled: true
+    createHistos: true
+ClusterNonLinearity:
+    enabled: true
+    createHistos: true
+    nonLinFunct: kPi0MCv3
+ClusterTrackMatcher:
+    enabled: true
+    createHistos: true
+ClusterHadronicCorrection:
+    enabled: false
+    createHistos: true

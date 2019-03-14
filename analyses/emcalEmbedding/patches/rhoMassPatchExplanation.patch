@@ -1,0 +1,69 @@
+From 4872de1e7e6e45d8df8b224033d09c2f038506e4 Mon Sep 17 00:00:00 2001
+From: Raymond Ehlers <raymond.ehlers@gmail.com>
+Date: Wed, 5 Apr 2017 16:42:15 -0400
+Subject: [PATCH] Rho mass update explanation
+
+Explains the issues caused by the current Rho Mass task when comparing
+the new and old embedding frameworks, and then shows and discusses some
+of the code needed to update the task. Some decisions needs to be made
+about backwards compatibility, and then the task needs to be updated.
+
+This patch _should not_ be committed to AliPhysics
+---
+ PWGJE/EMCALJetTasks/AliAnalysisTaskRhoMass.cxx | 32 +++++++++++++++++++++++---
+ 1 file changed, 29 insertions(+), 3 deletions(-)
+
+diff --git a/PWGJE/EMCALJetTasks/AliAnalysisTaskRhoMass.cxx b/PWGJE/EMCALJetTasks/AliAnalysisTaskRhoMass.cxx
+index 85fec7c..0de50fe 100644
+--- a/PWGJE/EMCALJetTasks/AliAnalysisTaskRhoMass.cxx
++++ b/PWGJE/EMCALJetTasks/AliAnalysisTaskRhoMass.cxx
+@@ -140,6 +140,7 @@ Bool_t AliAnalysisTaskRhoMass::Run()
+     Double_t rhom = TMath::Median(NjetAcc, rhomvec);
+     fOutRhoMass->SetVal(rhom);
+ 
++    // Fix this with multiple track containers! See the base class
+     Int_t Ntracks = fTracks->GetEntries();
+     Double_t meanM = TMath::Mean(NjetAcc, Mvec);
+     Double_t meanE = TMath::Mean(NjetAcc, Evec);
+@@ -194,10 +195,35 @@ Double_t AliAnalysisTaskRhoMass::GetMd(AliEmcalJet *jet) {
+   Double_t E = 0.;
+ 
+   if (fTracks) {
+-    AliVParticle *vp;
++    TLorentzVector * vp = new TLorentzVector;
++    AliVParticle *part;
+     for(Int_t icc=0; icc<jet->GetNumberOfTracks(); icc++) {
+-      vp = static_cast<AliVParticle*>(jet->TrackAt(icc, fTracks));
+-      if(!vp) continue;
++      part = static_cast<AliVParticle*>(jet->TrackAt(icc, fTracks));
++      if(!part) continue;
++      /*
++      Explanation of mis-match derived from this point
++
++      The mass hypothesis is set in the PicoTracks to 0.13957. The stored tracks use the PID mass hypothesis.
++      Thus, part->M() returns different values in the old and new frameworks.
++      
++      If the user wants to set a uniform mass in the new framework, they need to use Track Containers. In that case,
++      the track containers need to be added to this task (which requires the task to be updated to use track containers),
++      the desired mass hypothesis should be set in the track containers, and then something like the following lines:
++
++      //
++      TLorentzVector mom;
++      auto result = fParticleContainerIndexMpa.LocalIndexFromGlobalIndex(jet->TrackAt(i));
++      result.second->GetMomentumFromParticle(mom, part);
++      //
++
++      However, this still suffers from the fact that it doesn't handle PicoTracks properly. To be backwards compatible,
++      perhaps check for PicoTracks explicitly and then use their mass directly, but use the above code otherwise?
++
++      Below is a hard coded mass! The new and old frameworks agree using the code, but it is _not_ a good general solution!
++      */
++      vp->SetPtEtaPhiM(part->Pt(), part->Eta(), part->Phi(), 0.13957);
++      AliDebug(4, TString::Format("Track %d M: %f, part M: %f", icc, vp->M(), part->M()));
++      // End of modifications
+       if(fJetRhoMassType==kMd) sum += TMath::Sqrt(vp->M()*vp->M() + vp->Pt()*vp->Pt()) - vp->Pt(); //sqrt(E^2-P^2+pt^2)=sqrt(E^2-pz^2)
+       else if(fJetRhoMassType==kMdP) sum += TMath::Sqrt(vp->M()*vp->M() + vp->P()*vp->P()) - vp->P();
+       else if(fJetRhoMassType==kMd4) {
+-- 
+2.10.1 (Apple Git-78)
+

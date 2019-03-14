@@ -1,0 +1,45 @@
+configurationName: "New EMCal corrections test configuration"
+period: "LHC11h"
+pass: ""
+sharedParameters:
+    # Need to determine what we actually want to share
+    cellBranchName: "emcalCellsNew"
+    clusterBranchName: "caloClustersNew"
+    trackBranchName: "tracksNew"
+inputObjects:
+    cells:
+        defaultCells:
+            # Sets the branch name
+            branchName: "sharedParameters:cellBranchName"
+    clusterContainers:
+        defaultClusterContainer:
+            # Sets the branch name
+            branchName: "sharedParameters:clusterBranchName"
+    trackContainers:
+        defaultTrackContainer:
+            # Sets the branch name
+            branchName: "sharedParameters:trackBranchName"
+CellEnergy:
+    enabled: true
+    createHistos: false
+CellBadChannel:
+    enabled: true
+    createHistos: false
+CellTimeCalib:
+    enabled: true
+    createHistos: false
+Clusterizer:
+    enabled: true
+    createHistos: true
+ClusterExotics:
+    enabled: true
+    createHistos: true
+ClusterNonLinearity:
+    enabled: true
+    createHistos: true
+ClusterTrackMatcher:
+    enabled: true
+    createHistos: true
+ClusterHadronicCorrection:
+    enabled: true
+    createHistos: true
