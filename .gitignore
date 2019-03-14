@@ -26,6 +26,7 @@ G__*.cxx
 *.bak
 *.pyc
 *.swp
+*~
 .DS_Store
 .project
 .vscode
