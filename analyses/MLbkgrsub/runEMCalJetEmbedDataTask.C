@@ -265,7 +265,7 @@ boost::v1_53_0 cgal::v4.4 fastjet::v3.0.6_1.012
   // Embedding files list                                                                                                                             
   const std::string embeddedFilesList = "files_mctest.txt";
   // If true, events that are not selected in the PbPb will not be used for embedding.                                                                  // This ensures that good embedded events are not wasted on bad PbPb events.                                                                      
-  const bool internalEventSelection = true;
+  const bool internalEventSelection = false;
   // Background subtraction                                                                                                                         
   const bool enableBackgroundSubtraction = false;
   // Do jet matching                                                                                                                                 
@@ -330,8 +330,10 @@ boost::v1_53_0 cgal::v4.4 fastjet::v3.0.6_1.012
   }
 
   // CDBconnect task                                                                                                                               
-  AliTaskCDBconnect * taskCDB = AddTaskCDBconnect();
-  taskCDB->SetFallBackToRaw(kTRUE);
+  if (fullJets) {
+    AliTaskCDBconnect * taskCDB = AddTaskCDBconnect();
+    taskCDB->SetFallBackToRaw(kTRUE);
+  }
   /* if (bDoFullJets || iDataType == kEsd) {
     AliTaskCDBconnect *taskCDB = AddTaskCDBconnect();
     taskCDB->SetFallBackToRaw(kTRUE);
@@ -343,7 +345,7 @@ boost::v1_53_0 cgal::v4.4 fastjet::v3.0.6_1.012
   // The pT hard bin and anchor run can also be set by adding a printf() wild card to the string (ie %d)
   // See the documentation of AliAnalysisTaskEmcalEmbeddingHelper::GetFilenames()
   // For the grid. Include "alien://" and don't use this locally!! It will be very slow and cause strain on the grid!
-  //  embeddingHelper->SetFilePattern("~/alice/data/AliAOD.root");
+  //  embeddingHelper->SetFilePattern("~/alice/sim/2018/LHC18b8_cent_woSDD/20/282306/AliAOD.root");
   // For local use. File should be formatted the same as the normal list of input files (one filename per line).
   // Again, don't use AliEn locally!! It will be very slow and cause strain on the grid!
   // The pt hard bin should be set via the filenames in this file                                                                                        // If using a file pattern, it could be configured via embeddingHelper->SetPtHardBin(ptHardBin);                                                 
@@ -412,10 +414,13 @@ boost::v1_53_0 cgal::v4.4 fastjet::v3.0.6_1.012
     pRhoTask->SetExcludeLeadJets(2);
     pRhoTask->SelectCollisionCandidates(kPhysSel);
     pRhoTask->SetRecycleUnusedEmbeddedEventsMode(internalEventSelection);
-
-    TString sFuncPath = "alien:///alice/cern.ch/user/s/saiola/LHC11h_ScaleFactorFunctions.root";
-    TString sFuncName = "LHC11h_HadCorr20_ClustersV2";
-    pRhoTask->LoadRhoFunction(sFuncPath, sFuncName);
+    
+    if (fullJets)
+      {
+	TString sFuncPath = "alien:///alice/cern.ch/user/s/saiola/LHC11h_ScaleFactorFunctions.root";
+	TString sFuncName = "LHC11h_HadCorr20_ClustersV2";
+	pRhoTask->LoadRhoFunction(sFuncPath, sFuncName);
+      }
   }
 
 
