@@ -7,7 +7,7 @@ else
 fi
 
 if [ -z "$2" ]; then
-	PERIOD="LHC11h"
+	PERIOD="LHC15o"
 else
 	PERIOD="${2}"
 fi

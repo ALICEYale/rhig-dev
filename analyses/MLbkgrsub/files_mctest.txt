@@ -1,1 +1,1 @@
-/home/alidock/alice/sim/2018/LHC18b8_cent_woSDD/20/282306/AliAOD.root
+/home/alidock/alice/sim/2016/AliAOD.root

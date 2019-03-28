@@ -13,7 +13,7 @@ else
 fi
 
 if [ -z "$3" ]; then
-    FILELIST="~/alice/hadtoy/files_test.txt"
+    FILELIST="files_test.txt"
 else
 	FILELIST="${3}"
 fi
