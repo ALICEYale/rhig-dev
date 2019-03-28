@@ -47,6 +47,12 @@ class AliJetResponseMaker;
 
 namespace PWGJE {
   namespace EMCALJetTasks {
+    class AliAnalysisTaskEmcalJetPerfTree;
+  }
+}
+
+namespace PWGJE {
+  namespace EMCALJetTasks {
     class AliEmcalJetTaggerTaskFast;
   }
 }
@@ -65,6 +71,7 @@ R__ADD_INCLUDE_PATH($ALICE_PHYSICS)
 #include "PWGJE/EMCALJetTasks/macros/AddTaskRhoNew.C"
 #include "PWGJE/EMCALJetTasks/macros/AddTaskEmcalJet.C"
 #include "PWGJE/EMCALJetTasks/macros/AddTaskJetExtractor.C"
+#include "PWGJE/EMCALJetTasks/macros/AddTaskEmcalJetPerfTree.C"
 #include "PWGJE/EMCALJetTasks/macros/AddTaskJetResponseMaker.C"
 #endif
 
@@ -206,6 +213,8 @@ boost::v1_53_0 cgal::v4.4 fastjet::v3.0.6_1.012
   Bool_t bIsRun2 = kFALSE;
   if (sRunPeriod.Length() == 6 && sRunPeriod.BeginsWith("lhc15")) bIsRun2 = kTRUE;
 
+  cout << "run2: " << bIsRun2 << endl;
+
   //set beam type
   AliAnalysisTaskEmcal::BeamType iBeamType = AliAnalysisTaskEmcal::kpp;
   if (sRunPeriod == "lhc10h" || sRunPeriod == "lhc11h" || sRunPeriod == "lhc15o") {
@@ -261,11 +270,11 @@ boost::v1_53_0 cgal::v4.4 fastjet::v3.0.6_1.012
   ////////////////////////                                                                                                                              // Configuration options                                                                                                                            
   ////////////////////////                                                                                                                             
   // Use full or charged jets                                                                                                                         
-  const bool fullJets = false;
+  const bool fullJets =true;
   // Embedding files list                                                                                                                             
   const std::string embeddedFilesList = "files_mctest.txt";
   // If true, events that are not selected in the PbPb will not be used for embedding.                                                                  // This ensures that good embedded events are not wasted on bad PbPb events.                                                                      
-  const bool internalEventSelection = true;
+  const bool internalEventSelection = false;
   // Background subtraction                                                                                                                         
   const bool enableBackgroundSubtraction = false;
   // Do jet matching                                                                                                                                 
@@ -317,8 +326,8 @@ boost::v1_53_0 cgal::v4.4 fastjet::v3.0.6_1.012
 
   // Centrality task
   // The Run 2 condition is too restrictive, but until the switch to MultSelection is complete, it is the best we can do                              
-  if (iDataType == kEsd && iBeamType != AliAnalysisTaskEmcal::kpp && bIsRun2 == kFALSE) {
-    //  if (iDataType == kEsd && iBeamType != AliAnalysisTaskEmcal::kpp) {
+  //  if (iDataType == kEsd && iBeamType != AliAnalysisTaskEmcal::kpp && bIsRun2 == kFALSE) {
+  if (iDataType == kEsd && iBeamType != AliAnalysisTaskEmcal::kpp) {
     AliCentralitySelectionTask *pCentralityTask = AddTaskCentrality(kTRUE);
     pCentralityTask->SelectCollisionCandidates(AliVEvent::kAny);
   }
@@ -326,14 +335,14 @@ boost::v1_53_0 cgal::v4.4 fastjet::v3.0.6_1.012
   // AliMultSelection                                                                                                                                    // Works for pp, pPb, and PbPb for the periods that it is calibrated                                                                             
   if (bIsRun2 == kTRUE) {
     AliMultSelectionTask * pMultSelectionTask = AddTaskMultSelection(kFALSE);
-    pMultSelectionTask->SelectCollisionCandidates(AliVEvent::kAny);
+    pMultSelectionTask->SelectCollisionCandidates(kPhysSel);
   }
 
   // CDBconnect task                                                                                                                               
-  if (fullJets) {
+  //  if (fullJets) {
     AliTaskCDBconnect * taskCDB = AddTaskCDBconnect();
     taskCDB->SetFallBackToRaw(kTRUE);
-  }
+    //  }
   /* if (bDoFullJets || iDataType == kEsd) {
     AliTaskCDBconnect *taskCDB = AddTaskCDBconnect();
     taskCDB->SetFallBackToRaw(kTRUE);
@@ -361,6 +370,7 @@ boost::v1_53_0 cgal::v4.4 fastjet::v3.0.6_1.012
   // ... Set pt hard bin properties
   //  embeddingHelper->SetPtHardBin(4);
   // Some example settings for LHC12a15e_fix (anchored to LHC11h)                                                                                     
+  embeddingHelper->SelectCollisionCandidates(kPhysSel);
   embeddingHelper->SetNPtHardBins(11);
   embeddingHelper->SetMCRejectOutliers();
   // Setup internal event selection and additional configuration options                                                                             
@@ -414,6 +424,7 @@ boost::v1_53_0 cgal::v4.4 fastjet::v3.0.6_1.012
     pRhoTask->SetExcludeLeadJets(2);
     pRhoTask->SelectCollisionCandidates(kPhysSel);
     pRhoTask->SetRecycleUnusedEmbeddedEventsMode(internalEventSelection);
+    pRhoTask->SetUseNewCentralityEstimation(kTRUE);
     
     if (fullJets)
       {
@@ -464,6 +475,7 @@ boost::v1_53_0 cgal::v4.4 fastjet::v3.0.6_1.012
   AliEmcalJetTask * pFullJetTaskPartLevel = AliEmcalJetTask::AddTaskEmcalJet("mcparticles", "", jetAlgorithm, jetRadius, jetType, minTrackPt, minClusterPt, kGhostArea, recoScheme, "partLevelJets", minJetPt, lockTask, fillGhosts);
   pFullJetTaskPartLevel->SelectCollisionCandidates(kPhysSel);
   pFullJetTaskPartLevel->SetRecycleUnusedEmbeddedEventsMode(internalEventSelection);
+  pFullJetTaskPartLevel->SetUseNewCentralityEstimation(kTRUE);
 
   ///////                                                                                                                                                // External event (called embedding) settings for particle level PYTHIA jet finding                                                               
   ///////                                                                                                                                           
@@ -476,17 +488,21 @@ boost::v1_53_0 cgal::v4.4 fastjet::v3.0.6_1.012
   AliEmcalJetTask * pFullJetTaskDetLevel = AliEmcalJetTask::AddTaskEmcalJet(tracksName.Data(), clustersName.Data(),jetAlgorithm, jetRadius, jetType, minTrackPt, minClusterPt, kGhostArea, recoScheme, "detLevelJets", minJetPt, lockTask, fillGhosts);
   pFullJetTaskDetLevel->SelectCollisionCandidates(kPhysSel);
   pFullJetTaskDetLevel->SetRecycleUnusedEmbeddedEventsMode(internalEventSelection);
+  pFullJetTaskDetLevel->SetUseNewCentralityEstimation(kTRUE);
 
   ///////                                                                                                                                                // External event (embedding) settings for det level PYTHIA jet finding                                                                                ///////                                                                                                                                               // Tracks                                                                                                                                             // Uses the name of the container passed into AliEmcalJetTask                                                                                   
   AliTrackContainer * tracksDetLevel = pFullJetTaskDetLevel->GetTrackContainer(0);
   // Get the det level tracks from the external event!                                                                                               
   tracksDetLevel->SetIsEmbedding(kTRUE);
+
+
   // Clusters                                                                                                                                       
   if (fullJets) {
     // Uses the name of the container passed into AliEmcalJetTask                                                                                   
     AliClusterContainer * clustersDetLevel = pFullJetTaskDetLevel->GetClusterContainer(0);
     // Get the det level clusters from the external event!                                                                                           
     clustersDetLevel->SetIsEmbedding(kTRUE);
+
     // Additional configuration                                                                                                                      
     clustersDetLevel->SetDefaultClusterEnergy(AliVCluster::kHadCorr);
   }
@@ -498,6 +514,7 @@ boost::v1_53_0 cgal::v4.4 fastjet::v3.0.6_1.012
 								    jetAlgorithm, jetRadius, jetType, minTrackPt, minClusterPt, kGhostArea, recoScheme, "PbPbLevelJets", minJetPt, lockTask, fillGhosts);
   pFullJetTask->SelectCollisionCandidates(kPhysSel);
   pFullJetTask->SetRecycleUnusedEmbeddedEventsMode(internalEventSelection);
+  pFullJetTask->SetUseNewCentralityEstimation(kTRUE);
   if (fullJets) {
     pFullJetTask->GetClusterContainer(0)->SetDefaultClusterEnergy(AliVCluster::kHadCorr);
   }
@@ -511,6 +528,7 @@ boost::v1_53_0 cgal::v4.4 fastjet::v3.0.6_1.012
 									  jetAlgorithm, jetRadius, jetType, minTrackPt, minClusterPt, kGhostArea, recoScheme, "hybridLevelJets", minJetPt, lockTask, fillGhosts);
   pFullJetTaskHybrid->SelectCollisionCandidates(kPhysSel);
   pFullJetTaskHybrid->SetRecycleUnusedEmbeddedEventsMode(internalEventSelection);
+  pFullJetTaskHybrid->SetUseNewCentralityEstimation(kTRUE);
   if (fullJets) {
     pFullJetTaskHybrid->GetClusterContainer(0)->SetDefaultClusterEnergy(AliVCluster::kHadCorr);
   }
@@ -522,6 +540,7 @@ boost::v1_53_0 cgal::v4.4 fastjet::v3.0.6_1.012
   AliTrackContainer * tracksEmbedDetLevel = new AliTrackContainer(tracksName.Data());
   // Get the det level tracks from the external event!                                                                                                 
   tracksEmbedDetLevel->SetIsEmbedding(kTRUE);
+
   tracksEmbedDetLevel->SetParticlePtCut(minTrackPt);
   pFullJetTaskHybrid->AdoptTrackContainer(tracksEmbedDetLevel);
   // Clusters                                                                                                                                          
@@ -549,6 +568,7 @@ boost::v1_53_0 cgal::v4.4 fastjet::v3.0.6_1.012
   sampleTaskPartLevel->SetHistoBins(600, 0, 300);
   sampleTaskPartLevel->SetRecycleUnusedEmbeddedEventsMode(internalEventSelection);
   sampleTaskPartLevel->SelectCollisionCandidates(kPhysSel);
+  sampleTaskPartLevel->SetUseNewCentralityEstimation(kTRUE);
 
   AliJetContainer* jetContPartLevel02 = sampleTaskPartLevel->AddJetContainer(pFullJetTaskPartLevel->GetName(), acceptanceType, jetRadius);
 
@@ -558,10 +578,13 @@ boost::v1_53_0 cgal::v4.4 fastjet::v3.0.6_1.012
   // Cells are left empty because special care is needed to retrieve the embedded cells. Such code is not in the                                       
   // sample task, but is available in the EMCal Correction Framework                                                                                   
   AliAnalysisTaskEmcalJetSample * sampleTaskDetLevel = AliAnalysisTaskEmcalJetSample::AddTaskEmcalJetSample(tracksName.Data(), clustersName.Data(), "", "detLevelJets");
+  sampleTaskDetLevel->SetUseNewCentralityEstimation(kTRUE);
+
   // Tracks                                                                                                                                            
   // Set embedding                                                                                                                                     
   AliParticleContainer * detLevelPartCont = sampleTaskDetLevel->GetParticleContainer(0);
   detLevelPartCont->SetIsEmbedding(kTRUE);
+
   // Settings                                                                                                                                          
   detLevelPartCont->SetParticlePtCut(0.15);
 
@@ -598,6 +621,8 @@ boost::v1_53_0 cgal::v4.4 fastjet::v3.0.6_1.012
   sampleTask->SetHistoBins(600, 0, 300);
   sampleTask->SetRecycleUnusedEmbeddedEventsMode(internalEventSelection);
   sampleTask->SelectCollisionCandidates(kPhysSel);
+  sampleTask->SetUseNewCentralityEstimation(kTRUE);
+
 
   AliJetContainer* jetContPbPb02 = sampleTask->AddJetContainer(jetType, jetAlgorithm, recoScheme, jetRadius, acceptanceType, "PbPbLevelJets");
 
@@ -610,6 +635,8 @@ boost::v1_53_0 cgal::v4.4 fastjet::v3.0.6_1.012
 
   // PbPb tracks settings                                                                                                                              
   sampleTaskHybrid->GetParticleContainer(0)->SetParticlePtCut(0.15);
+  sampleTaskHybrid->SetUseNewCentralityEstimation(kTRUE);
+
 
   // Embed tracks                                                                                                                                      
   tracksDetLevel = new AliTrackContainer(tracksName.Data());
@@ -681,7 +708,10 @@ boost::v1_53_0 cgal::v4.4 fastjet::v3.0.6_1.012
      );
     // Task level settings                                                                                                                             
     jetTaggerDetLevel->SetRecycleUnusedEmbeddedEventsMode(internalEventSelection);
-    // Tag via geometrical matching                                                                                                                    
+    // Tag via geometrical matching                     
+
+    jetTaggerDetLevel->SetUseNewCentralityEstimation(kTRUE);
+                                                                                               
     jetTaggerDetLevel->SetJetTaggingMethod(PWGJE::EMCALJetTasks::AliEmcalJetTaggerTaskFast::kGeo);
     // Tag the closest jet                                                                                                                             
     jetTaggerDetLevel->SetJetTaggingType(PWGJE::EMCALJetTasks::AliEmcalJetTaggerTaskFast::kClosest);
@@ -720,6 +750,8 @@ boost::v1_53_0 cgal::v4.4 fastjet::v3.0.6_1.012
     // Task level settings                                                                                                                             
     jetTaggerPartLevel->SetRecycleUnusedEmbeddedEventsMode(internalEventSelection);
     // Tag via geometrical matching                                                                                                                    
+    jetTaggerPartLevel->SetUseNewCentralityEstimation(kTRUE);
+
     jetTaggerPartLevel->SetJetTaggingMethod(PWGJE::EMCALJetTasks::AliEmcalJetTaggerTaskFast::kGeo);
     // Tag the closest jet                                                                                                                             
     jetTaggerPartLevel->SetJetTaggingType(PWGJE::EMCALJetTasks::AliEmcalJetTaggerTaskFast::kClosest);
