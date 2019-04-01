@@ -45,14 +45,15 @@ class AliEmcalJetTask;
 class AliAnalysisTaskEmcalJetSample;
 class AliJetResponseMaker;
 
-namespace PWGJE {
+/*namespace PWGJE {
   namespace EMCALJetTasks {
-    class AliAnalysisTaskEmcalJetPerfTree;
+    
   }
-}
+  }*/
 
 namespace PWGJE {
   namespace EMCALJetTasks {
+    class AliAnalysisTaskEmcalJetPerfTree;
     class AliEmcalJetTaggerTaskFast;
   }
 }
@@ -71,7 +72,7 @@ R__ADD_INCLUDE_PATH($ALICE_PHYSICS)
 #include "PWGJE/EMCALJetTasks/macros/AddTaskRhoNew.C"
 #include "PWGJE/EMCALJetTasks/macros/AddTaskEmcalJet.C"
 #include "PWGJE/EMCALJetTasks/macros/AddTaskJetExtractor.C"
-#include "PWGJE/EMCALJetTasks/macros/AddTaskEmcalJetPerfTree.C"
+//#include "PWGJE/EMCALJetTasks/macros/AddTaskEmcalJetPerfTree.C"
 #include "PWGJE/EMCALJetTasks/macros/AddTaskJetResponseMaker.C"
 #endif
 
@@ -769,6 +770,8 @@ boost::v1_53_0 cgal::v4.4 fastjet::v3.0.6_1.012
     detLevelJetCont->SetMaxTrackPt(100);
   }
 
+  PWGJE::EMCALJetTasks::AliAnalysisTaskEmcalJetPerfTree * jetPerfTree = PWGJE::EMCALJetTasks::AliAnalysisTaskEmcalJetPerfTree::AddTaskEmcalJetPerfTree("test");
+
   /*//jets from pythia at particle level
   AliEmcalJetTask *JetExtractor_R04_JF_PYTHIA_PartLevel = AliEmcalJetTask::AddTaskEmcalJet("","",AliJetContainer::antikt_algorithm, 0.4, AliJetContainer::kChargedJet, 0.15, 0.3, 0.005, AliJetContainer::E_scheme, "JetPartLevel", 0., kTRUE, kFALSE);
   JetExtractor_R04_JF_PYTHIA_PartLevel->SetNeedEmcalGeom(kFALSE);
@@ -945,6 +948,7 @@ void LoadMacros()
   gROOT->LoadMacro("$ALICE_PHYSICS/PWGPP/PilotTrain/AddTaskCDBconnect.C");
   //  gROOT->LoadMacro("$ALICE_PHYSICS/PWGJE/EMCALJetTasks/macros/AddTaskEmcalJetSample.C");
   gROOT->LoadMacro("$ALICE_PHYSICS/PWGJE/EMCALJetTasks/macros/AddTaskRhoNew.C");
+  //  gROOT->LoadMacro("$ALICE_PHYSICS/PWGJE/EMCALJetTasks/macros/AddTaskEmcalJetPerfTree.C");
 }
 
 void StartGridAnalysis(AliAnalysisManager* pMgr, const char* uniqueName, const char* cGridMode)

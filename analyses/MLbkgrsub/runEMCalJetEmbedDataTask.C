@@ -45,14 +45,15 @@ class AliEmcalJetTask;
 class AliAnalysisTaskEmcalJetSample;
 class AliJetResponseMaker;
 
-namespace PWGJE {
+/*namespace PWGJE {
   namespace EMCALJetTasks {
-    class AliAnalysisTaskEmcalJetPerfTree;
+    
   }
-}
+  }*/
 
 namespace PWGJE {
   namespace EMCALJetTasks {
+    class AliAnalysisTaskEmcalJetPerfTree;
     class AliEmcalJetTaggerTaskFast;
   }
 }
@@ -768,6 +769,8 @@ boost::v1_53_0 cgal::v4.4 fastjet::v3.0.6_1.012
     detLevelJetCont = jetTaggerPartLevel->GetJetContainer(0);
     detLevelJetCont->SetMaxTrackPt(100);
   }
+
+  PWGJE::EMCALJetTasks::AliAnalysisTaskEmcalJetPerfTree * jetPerfTree = PWGJE::EMCALJetTasks::AliAnalysisTaskEmcalJetPerfTree::AddTaskEmcalJetPerfTree("test");
 
   /*//jets from pythia at particle level
   AliEmcalJetTask *JetExtractor_R04_JF_PYTHIA_PartLevel = AliEmcalJetTask::AddTaskEmcalJet("","",AliJetContainer::antikt_algorithm, 0.4, AliJetContainer::kChargedJet, 0.15, 0.3, 0.005, AliJetContainer::E_scheme, "JetPartLevel", 0., kTRUE, kFALSE);
