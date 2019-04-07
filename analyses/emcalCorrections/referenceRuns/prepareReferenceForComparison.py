@@ -8,11 +8,11 @@
 #
 # author: Raymond Ehlers <raymond.ehlers@yale.edu>, Yale University
 
-from rootpy.io import root_open
-from rootpy import ROOT
 import argparse
-from ruamel import yaml
 import os
+from pachyderm import histogram
+import ROOT
+import ruamel.yaml
 
 def rewriteWithDifferentName(element, suffix, elementNamesMap):
     """ Rewrite an element from an open file with a different name.
@@ -34,7 +34,7 @@ def rewriteWithDifferentName(element, suffix, elementNamesMap):
 def renameElements(filename, suffix, debug):
     print("Renaming elemnts in filename: \"{}\"".format(filename))
     elementNamesMap = {}
-    with root_open(filename, "UPDATE") as f:
+    with histogram.RootOpen(filename, "UPDATE") as f:
         if debug:
             print("f.ls()  pre:")
             f.ls()
@@ -74,8 +74,9 @@ def renameElements(filename, suffix, debug):
     # Write the reference map to the same directory as the reference file
     yamlReferenceMapLocation = os.path.join(os.path.dirname(filename), "referenceMap.yaml")
     print("Writing yaml reference map to \"{}\"".format(yamlReferenceMapLocation))
-    with open(yamlReferenceMapLocation, "w+b") as f:
-        yaml.safe_dump(elementNamesMap, f, default_flow_style = False)
+    y = ruamel.yaml.YAML()
+    with open(yamlReferenceMapLocation, "w") as f:
+        y.dump(elementNamesMap, f)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Prepare root file for use as a reference with the comparison script.")

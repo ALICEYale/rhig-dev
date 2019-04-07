@@ -326,7 +326,7 @@ def runComparison(inputFiles, newAnalysisList, oldAnalysisList, correctionListNa
     if saveHistsToRootFile:
         fOut = ROOT.TFile("compareHistos.root", "RECREATE")
         for lists in inputHists:
-            for k, hist in inputHists[lists].iteritems():
+            for k, hist in inputHists[lists].items():
                 hist.Write()
 
         fOut.Close()
@@ -712,7 +712,7 @@ if __name__ == '__main__':
         with open(args.yamlNewToOldDictFile, "r") as f:
             yamlTaskCorrespondence = yaml.load(f)
 
-        for key, val in yamlTaskCorrespondence.iteritems():
+        for key, val in yamlTaskCorrespondence.items():
             if not key in newToOldCorrections.keys() or args.overrideCorrectionsMap:
                 if args.overrideCorrectionsMap and key in newToOldCorrections.keys():
                     print("WARNING: Overriding key {0} from {1} to {2}".format(key, newToOldCorrections[key], val))
