@@ -111,6 +111,30 @@ then
         filename="aod_archive.zip"
     fi
 fi
+# LHC16j5: pp 5.02 TeV jet-jet PYTHIA anchored to LHC15o
+# https://alice.its.cern.ch/jira/browse/ALIROOT-6905
+if [[ "$system" == "pp" && "$period" == "LHC16j5" ]];
+then
+    data=${data:-"sim"}
+    year=${year:-"2016"}
+    run=${run:-"246945"}
+    if [[ -z "${ptHardBin}" ]]; then
+        echo "ERROR: pt hard bin is not selected! Please select one and try again!"
+        exit 1
+    fi
+    fileType=${fileType:-"AOD"}
+    filename=${filename:-"root_archive.zip"}
+    productionNumber=${productionNumber:-"200"}
+
+    # AOD200: /alice/sim/2016/LHC16j5/20/246945/AOD200/0004/AliAOD.root
+    searchpath="/alice/${data}/${year}/${period}/${ptHardBin}/${run}/"
+    if [[ "${fileType}" == "AOD" ]];
+    then
+        # Add "AOD" to searchpath and change filename
+        searchpath="${searchpath}${fileType}${productionNumber}/"
+        filename="AliAOD.root"
+    fi
+fi
 # LHC15i2c: pp 7 TeV D mseon MC
 if [[ "$system" == "pp" && "$period" == "LHC15i2c" ]];
 then
@@ -221,7 +245,7 @@ do
     if [[ "${nFiles}" -ge "${maxFiles}" ]]; then
         break
     fi
-    
+
     if [[ ! $file == /alice* ]]; then
         continue
     fi

@@ -57,7 +57,7 @@ void testYaml()
   retrievedValue = "";
   testConfig.GetProperty("hello:world", retrievedValue);
   CompareStringValues(testStr, retrievedValue);
-  
+
   std::cout << "Test existing YAML Node\n";
   testConfig.WriteProperty("hello2:world", testStr2, configName);
   // Check the value
