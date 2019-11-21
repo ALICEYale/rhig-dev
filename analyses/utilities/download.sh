@@ -213,7 +213,22 @@ then
     # /alice/data/2015/LHC15o/000245683/pass1/AOD194
     searchpath="/alice/${data}/${year}/${period}/${run}/pass${pass}/${fileType}${productionNumber}"
 fi
+# 2017 5 TeV pp reference
+if [[ "$system" == "pp" && "$period" == "LHC17p" || "$period" == "LHC17q" ]];
+then
+    data=${data:-"data"}
+    year=${year:-"2017"}
+    # The first run from the Central Barrel Tracking list
+    run=${run:-"000282343"}
+    pass=${pass:-"1_FAST"}
+    fileType=${fileType:-"AOD"}
+    filename=${filename:-"AliAOD.root"}
+    productionNumber=${productionNumber:-"208"}
 
+    # AOD208:
+    # /alice/data/2017/LHC17p/000282343/pass1_FAST/AOD208/0001/
+    searchpath="/alice/${data}/${year}/${period}/${run}/pass${pass}/${fileType}${productionNumber}"
+fi
 
 # Fall back to default if it is an unknown period
 if [[ -z "$searchpath" ]];
