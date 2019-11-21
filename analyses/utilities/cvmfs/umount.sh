@@ -3,6 +3,6 @@
 echo "Requesting sudo to unmount CVMFS repos!"
 
 # Mount main alice repo
-sudo umount /cvmfs/alice.cern.ch
+sudo umount /Users/Shared/cvmfs/alice.cern.ch
 # OCDB
-sudo umount /cvmfs/alice-ocdb.cern.ch
+sudo umount /Users/Shared/cvmfs/alice-ocdb.cern.ch
