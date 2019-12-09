@@ -8,8 +8,8 @@
 
 # Select system and period
 # Possible systems are "PbPb", "pPb", and "pp"
-system="PbPb"
-period="LHC15o"
+system="pp"
+period="LHC18b8_fast"
 # Select options:
 # Max number of files to have locally
 maxFiles=2
@@ -34,7 +34,7 @@ pass=""
 fileType=""
 productionNumber=""
 # pT Hard Bins (when applicable)
-ptHardBin="4"
+ptHardBin="8"
 # Filename is often "root_archive.zip" or "aod_archive.zip", depending on the data set
 filename=""
 
@@ -228,6 +228,23 @@ then
     # AOD208:
     # /alice/data/2017/LHC17p/000282343/pass1_FAST/AOD208/0001/
     searchpath="/alice/${data}/${year}/${period}/${run}/pass${pass}/${fileType}${productionNumber}"
+fi
+# PYTHIA jet-jet anchored to LHC17{p,q}
+if [[ "$system" == "pp" && "$period" == "LHC18b8_fast" || "$period" == "LHC18b8_cent_woSSD" ]];
+then
+    data=${data:-"sim"}
+    year=${year:-"2018"}
+    # The first run from the Central Barrel Tracking list
+    run=${run:-"282343"}
+    if [[ -z "${ptHardBin}" ]]; then
+        echo "ERROR: pt hard bin is not selected! Please select one and try again!"
+        exit 1
+    fi
+    fileType=${fileType:-"AOD"}
+    filename=${filename:-"aod_archive.zip"}
+
+    # /alice/sim/2018/LHC18b8_fast/20/282367/AOD
+    searchpath="/alice/${data}/${year}/${period}/${ptHardBin}/${run}"
 fi
 
 # Fall back to default if it is an unknown period
